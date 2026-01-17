@@ -39,6 +39,8 @@
                 triggerHaptic(10); // Light haptic per character
                 await new Promise(r => setTimeout(r, 60));
             }
+            typingSound.pause();
+            typingSound.currentTime = 0;
         }
 
         async function deleteWriter() {
