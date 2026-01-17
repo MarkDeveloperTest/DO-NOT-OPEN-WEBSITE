@@ -19,6 +19,7 @@
         const bottleTrigger = document.getElementById('bottle-trigger');
         const searchText = document.getElementById('search-text');
         const popInstruction = document.getElementById('pop-instruction');
+        const typingSound = document.getElementById('typing-sound');
 
         let tapCount = 0;
         const totalTapsRequired = 3;
@@ -32,6 +33,7 @@
         }
 
         async function typeWriter(text) {
+            typingSound.play();
             for (let char of text) {
                 searchText.innerHTML += char;
                 triggerHaptic(10); // Light haptic per character
@@ -41,12 +43,16 @@
 
         async function deleteWriter() {
             let text = searchText.innerHTML;
-            while (text.length > 0) {
+            while (text.length > 1) {
                 text = text.slice(0, -1);
                 searchText.innerHTML = text;
                 triggerHaptic(5); // Very light haptic per deletion
                 await new Promise(r => setTimeout(r, 25));
             }
+            typingSound.pause();
+            typingSound.currentTime = 0;
+            // Delete the last character silently
+            searchText.innerHTML = '';
         }
 
         async function animateCharacters(containerId, text, styleClass, speed) {
@@ -167,6 +173,8 @@
             
             // Progressive Haptic Feedback
             bottleTrigger.classList.remove('shake-1', 'shake-2', 'shake-3');
+            void bottleTrigger.offsetWidth; // Force reflow to restart animation
+            
             if (tapCount === 1) {
                 triggerHaptic(40); 
                 bottleTrigger.classList.add('shake-1');

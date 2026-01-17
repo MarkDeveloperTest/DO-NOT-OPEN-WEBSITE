@@ -158,14 +158,27 @@
             50% { filter: drop-shadow(0 10px 35px rgba(251, 146, 60, 0.5)) drop-shadow(0 0 25px rgba(249, 115, 22, 0.4)); }
         }
         
-        .shake-1 { animation: shake 0.3s infinite; }
-        .shake-2 { animation: shake 0.15s infinite; }
-        .shake-3 { animation: shake 0.05s infinite; }
+        .shake-1 { animation: shake-1 0.3s infinite; }
+        .shake-2 { animation: shake-2 0.15s infinite; }
+        .shake-3 { animation: shake-3 0.05s infinite; }
 
-        @keyframes shake {
+        @keyframes shake-1 {
             0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(-2deg) translateX(-1px); }
-            75% { transform: rotate(2deg) translateX(1px); }
+            25% { transform: rotate(-3deg) translateX(-2px); }
+            75% { transform: rotate(3deg) translateX(2px); }
+        }
+
+        @keyframes shake-2 {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-6deg) translateX(-4px); }
+            75% { transform: rotate(6deg) translateX(4px); }
+        }
+
+        @keyframes shake-3 {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg) translateX(-6px); }
+            50% { transform: rotate(10deg) translateX(6px); }
+            75% { transform: rotate(-8deg) translateX(-5px); }
         }
 
         .bottle-pop-anim {
