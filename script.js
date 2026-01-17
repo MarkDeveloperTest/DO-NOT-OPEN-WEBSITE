@@ -1,10 +1,11 @@
-       const timeline = [
+    const timeline = [
             { id: 'scene-start', duration: null },
             { id: 'scene-search', duration: null },
             { id: 'scene-story-1', duration: 3500, text: "That's what I was going to search...", style: 'char-style-1', speed: 30 },
             { id: 'scene-story-2', duration: 3500, text: "But then I stopped and realized...", style: 'char-style-2', speed: 30 },
             { id: 'scene-story-3', duration: 3500, text: "I wanted to make something special...", style: 'char-style-1', speed: 30 },
-            { id: 'scene-story-4', duration: 5000, text: "Because YOU are special :)", style: 'char-special', speed: 50, sparkle: true },
+            { id: 'scene-story-4', duration: 4000, text: "Because YOU are special :)", style: 'char-special', speed: 50 },
+            { id: 'scene-pop', duration: null }, 
             { id: 'scene-1', duration: 4000 },
             { id: 'scene-2', duration: 4000 },
             { id: 'scene-3', duration: 4000 },
@@ -12,14 +13,28 @@
             { id: 'scene-5', duration: null }
         ];
 
-        let currentSceneIndex = 0;
         const progressBar = document.getElementById('progress-bar');
         const beginBtn = document.getElementById('begin-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const bottleTrigger = document.getElementById('bottle-trigger');
         const searchText = document.getElementById('search-text');
+        const popInstruction = document.getElementById('pop-instruction');
+
+        let tapCount = 0;
+        const totalTapsRequired = 3;
+        let currentSceneIndex = 0;
+
+        // Haptic Feedback Helper
+        function triggerHaptic(pattern) {
+            if ("vibrate" in navigator) {
+                navigator.vibrate(pattern);
+            }
+        }
 
         async function typeWriter(text) {
             for (let char of text) {
                 searchText.innerHTML += char;
+                triggerHaptic(10); // Light haptic per character
                 await new Promise(r => setTimeout(r, 60));
             }
         }
@@ -29,6 +44,7 @@
             while (text.length > 0) {
                 text = text.slice(0, -1);
                 searchText.innerHTML = text;
+                triggerHaptic(5); // Very light haptic per deletion
                 await new Promise(r => setTimeout(r, 25));
             }
         }
@@ -54,29 +70,8 @@
             }
         }
 
-        function createTwinkleSparkles() {
-            const layer = document.getElementById('text-sparkle-layer');
-            const target = document.getElementById('text-story-4');
-            if (!layer || !target) return;
-
-            const interval = setInterval(() => {
-                if (!document.getElementById('scene-story-4').classList.contains('active')) {
-                    clearInterval(interval);
-                    return;
-                }
-
-                const s = document.createElement('div');
-                s.className = 'text-sparkle';
-                s.style.left = Math.random() * 90 + 5 + '%';
-                s.style.top = Math.random() * 80 + 10 + '%';
-                s.style.animationDelay = Math.random() * 2 + 's';
-                
-                layer.appendChild(s);
-                setTimeout(() => s.remove(), 2500);
-            }, 300);
-        }
-
         async function playScene(index) {
+            currentSceneIndex = index;
             const oldScene = document.querySelector('.scene.active');
             if (oldScene) {
                 oldScene.classList.replace('active', 'exit');
@@ -87,13 +82,14 @@
             currentEl.classList.remove('enter', 'exit');
             currentEl.classList.add('active');
 
+            // Haptic Pulse on transition
+            if (index > 0) {
+                triggerHaptic([20, 10, 20]);
+            }
+
             if (step.text) {
                 const targetId = step.id.replace('scene-', 'text-');
                 await animateCharacters(targetId, step.text, step.style, step.speed);
-                
-                if (step.sparkle) {
-                    createTwinkleSparkles();
-                }
             }
 
             if (step.duration) {
@@ -112,12 +108,45 @@
             await new Promise(r => setTimeout(r, 1200));
             await deleteWriter();
             await new Promise(r => setTimeout(r, 400));
-            playScene(2);
+            playScene(2); 
         }
 
         beginBtn.addEventListener('click', () => {
+            triggerHaptic(60); // Feedback for starting
             fireCornerConfetti();
             setTimeout(() => handleSearchSequence(), 600);
+        });
+
+        restartBtn.addEventListener('click', () => {
+            triggerHaptic(40); // Feedback for restart
+        });
+
+        bottleTrigger.addEventListener('click', () => {
+            tapCount++;
+            
+            // Visual feedback for tap
+            bottleTrigger.style.transform = `scale(${1 + tapCount * 0.1})`;
+            
+            // Progressive Haptic Feedback
+            bottleTrigger.classList.remove('shake-1', 'shake-2', 'shake-3');
+            if (tapCount === 1) {
+                triggerHaptic(40); 
+                bottleTrigger.classList.add('shake-1');
+                popInstruction.innerText = "Keep tapping...";
+            } else if (tapCount === 2) {
+                triggerHaptic([50, 40, 50]); 
+                bottleTrigger.classList.add('shake-2');
+                popInstruction.innerText = "Almost there!";
+            } else if (tapCount >= totalTapsRequired) {
+                triggerHaptic([150, 80, 250]); // Strong celebratory pop
+                bottleTrigger.classList.add('shake-3');
+                bottleTrigger.classList.add('bottle-pop-anim');
+                popInstruction.innerText = "POP!";
+                fireCornerConfetti();
+                setTimeout(() => {
+                    playScene(currentSceneIndex + 1); 
+                }, 800);
+            }
         });
 
         function createFloatingHearts() {
@@ -143,14 +172,14 @@
             const particles = [];
             const colors = ['#f87171', '#fb7185', '#ffffff', '#fcd34d'];
             function createBurst(x, direction) {
-                for (let i = 0; i < 40; i++) {
+                for (let i = 0; i < 50; i++) {
                     particles.push({
                         x: x, y: canvas.height,
-                        vx: direction * (Math.random() * 10 + 3),
-                        vy: Math.random() * -15 - 5,
+                        vx: direction * (Math.random() * 14 + 5),
+                        vy: Math.random() * -20 - 7,
                         color: colors[Math.floor(Math.random() * colors.length)],
-                        size: Math.random() * 4 + 2,
-                        gravity: 0.25, drag: 0.98, rotation: Math.random() * 360, rSpeed: (Math.random() - 0.5) * 5
+                        size: Math.random() * 5 + 2,
+                        gravity: 0.3, drag: 0.97, rotation: Math.random() * 360, rSpeed: (Math.random() - 0.5) * 8
                     });
                 }
             }
@@ -173,5 +202,8 @@
         window.onload = createFloatingHearts;
         window.onresize = () => {
             const c = document.getElementById('confetti-canvas');
-            c.width = window.innerWidth; c.height = window.innerHeight;
+            if (c) {
+                c.width = window.innerWidth; 
+                c.height = window.innerHeight;
+            }
         };

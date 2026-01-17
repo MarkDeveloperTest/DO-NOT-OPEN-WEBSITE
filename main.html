@@ -63,9 +63,8 @@
         .char-style-1 { animation: charFade 0.6s ease-out forwards; }
         .char-style-2 { animation: charSlideIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
         
-        /* Special Pink Text Style */
         .char-special {
-            color: #db2777; /* Pink 600 */
+            color: #db2777; 
             animation: charScale 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
 
@@ -82,24 +81,6 @@
         @keyframes charScale {
             from { opacity: 0; transform: scale(0.8); }
             to { opacity: 1; transform: scale(1); }
-        }
-
-        /* Sparkle over text animation */
-        @keyframes twinkle {
-            0%, 100% { opacity: 0; transform: scale(0); }
-            50% { opacity: 1; transform: scale(1.2); }
-        }
-
-        .text-sparkle {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            background: white;
-            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-            box-shadow: 0 0 5px #fff;
-            animation: twinkle 1.5s infinite ease-in-out;
-            pointer-events: none;
-            z-index: 20;
         }
 
         @keyframes float-heart {
@@ -164,6 +145,38 @@
             display: inline-block;
             position: relative;
         }
+
+        /* Bottle & Vibration Styles */
+        #bottle-trigger {
+            font-size: 80px;
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: inline-block;
+            -webkit-user-select: none;
+            user-select: none;
+            position: relative;
+            touch-action: manipulation;
+        }
+        
+        .shake-1 { animation: shake 0.3s infinite; }
+        .shake-2 { animation: shake 0.15s infinite; }
+        .shake-3 { animation: shake 0.05s infinite; }
+
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-2deg) translateX(-1px); }
+            75% { transform: rotate(2deg) translateX(1px); }
+        }
+
+        .bottle-pop-anim {
+            animation: bottlePop 0.4s ease-out forwards;
+        }
+        
+        @keyframes bottlePop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.6) translateY(-40px); opacity: 1; }
+            100% { transform: scale(2) translateY(-60px); opacity: 0; }
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-red-50 via-rose-50 to-red-100 text-gray-800">
@@ -214,17 +227,21 @@
         </div>
     </div>
 
-    <!-- SPECIAL SLIDE WITH SPARKLES (PINK TEXT) -->
     <div id="scene-story-4" class="scene enter">
         <div class="relative inline-block">
-            <div id="text-sparkle-layer" class="absolute inset-0 pointer-events-none"></div>
             <div class="story-box border-pink-200 bg-white/80">
                 <h2 id="text-story-4" class="text-base md:text-2xl font-script font-bold"></h2>
             </div>
         </div>
     </div>
 
-    <!-- NAME REVEAL (SUBTITLE REMOVED) -->
+    <!-- BOTTLE POP SCENE -->
+    <div id="scene-pop" class="scene enter">
+        <p id="pop-instruction" class="text-[10px] text-red-400 uppercase tracking-widest mb-4 opacity-60">Tap to celebrate</p>
+        <div id="bottle-trigger">🍾</div>
+    </div>
+
+    <!-- NAME REVEAL -->
     <div id="scene-1" class="scene enter">
         <h1 class="text-4xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-rose-700 mb-6 drop-shadow-md font-bold">
             Anna
@@ -267,7 +284,7 @@
         <div class="max-w-md px-4">
             <h2 class="text-2xl text-red-500 font-serif mb-3">Happy 16th, Anna</h2>
             <p class="text-xs text-gray-400 italic mb-6 leading-relaxed">May your year be as extraordinary as you are.</p>
-            <button onclick="location.reload()" class="px-5 py-2 border border-red-200 text-red-400 rounded-full text-[10px] font-bold tracking-widest uppercase hover:bg-white transition-all duration-300">Restart Journey</button>
+            <button id="restart-btn" onclick="location.reload()" class="px-5 py-2 border border-red-200 text-red-400 rounded-full text-[10px] font-bold tracking-widest uppercase hover:bg-white transition-all duration-300">Restart Journey</button>
         </div>
     </div>
 
@@ -278,7 +295,8 @@
             { id: 'scene-story-1', duration: 3500, text: "That's what I was going to search...", style: 'char-style-1', speed: 30 },
             { id: 'scene-story-2', duration: 3500, text: "But then I stopped and realized...", style: 'char-style-2', speed: 30 },
             { id: 'scene-story-3', duration: 3500, text: "I wanted to make something special...", style: 'char-style-1', speed: 30 },
-            { id: 'scene-story-4', duration: 5000, text: "Because YOU are special :)", style: 'char-special', speed: 50, sparkle: true },
+            { id: 'scene-story-4', duration: 4000, text: "Because YOU are special :)", style: 'char-special', speed: 50 },
+            { id: 'scene-pop', duration: null }, 
             { id: 'scene-1', duration: 4000 },
             { id: 'scene-2', duration: 4000 },
             { id: 'scene-3', duration: 4000 },
@@ -286,14 +304,28 @@
             { id: 'scene-5', duration: null }
         ];
 
-        let currentSceneIndex = 0;
         const progressBar = document.getElementById('progress-bar');
         const beginBtn = document.getElementById('begin-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const bottleTrigger = document.getElementById('bottle-trigger');
         const searchText = document.getElementById('search-text');
+        const popInstruction = document.getElementById('pop-instruction');
+
+        let tapCount = 0;
+        const totalTapsRequired = 3;
+        let currentSceneIndex = 0;
+
+        // Haptic Feedback Helper
+        function triggerHaptic(pattern) {
+            if ("vibrate" in navigator) {
+                navigator.vibrate(pattern);
+            }
+        }
 
         async function typeWriter(text) {
             for (let char of text) {
                 searchText.innerHTML += char;
+                triggerHaptic(10); // Light haptic per character
                 await new Promise(r => setTimeout(r, 60));
             }
         }
@@ -303,6 +335,7 @@
             while (text.length > 0) {
                 text = text.slice(0, -1);
                 searchText.innerHTML = text;
+                triggerHaptic(5); // Very light haptic per deletion
                 await new Promise(r => setTimeout(r, 25));
             }
         }
@@ -328,29 +361,8 @@
             }
         }
 
-        function createTwinkleSparkles() {
-            const layer = document.getElementById('text-sparkle-layer');
-            const target = document.getElementById('text-story-4');
-            if (!layer || !target) return;
-
-            const interval = setInterval(() => {
-                if (!document.getElementById('scene-story-4').classList.contains('active')) {
-                    clearInterval(interval);
-                    return;
-                }
-
-                const s = document.createElement('div');
-                s.className = 'text-sparkle';
-                s.style.left = Math.random() * 90 + 5 + '%';
-                s.style.top = Math.random() * 80 + 10 + '%';
-                s.style.animationDelay = Math.random() * 2 + 's';
-                
-                layer.appendChild(s);
-                setTimeout(() => s.remove(), 2500);
-            }, 300);
-        }
-
         async function playScene(index) {
+            currentSceneIndex = index;
             const oldScene = document.querySelector('.scene.active');
             if (oldScene) {
                 oldScene.classList.replace('active', 'exit');
@@ -361,13 +373,14 @@
             currentEl.classList.remove('enter', 'exit');
             currentEl.classList.add('active');
 
+            // Haptic Pulse on transition
+            if (index > 0) {
+                triggerHaptic([20, 10, 20]);
+            }
+
             if (step.text) {
                 const targetId = step.id.replace('scene-', 'text-');
                 await animateCharacters(targetId, step.text, step.style, step.speed);
-                
-                if (step.sparkle) {
-                    createTwinkleSparkles();
-                }
             }
 
             if (step.duration) {
@@ -386,12 +399,45 @@
             await new Promise(r => setTimeout(r, 1200));
             await deleteWriter();
             await new Promise(r => setTimeout(r, 400));
-            playScene(2);
+            playScene(2); 
         }
 
         beginBtn.addEventListener('click', () => {
+            triggerHaptic(60); // Feedback for starting
             fireCornerConfetti();
             setTimeout(() => handleSearchSequence(), 600);
+        });
+
+        restartBtn.addEventListener('click', () => {
+            triggerHaptic(40); // Feedback for restart
+        });
+
+        bottleTrigger.addEventListener('click', () => {
+            tapCount++;
+            
+            // Visual feedback for tap
+            bottleTrigger.style.transform = `scale(${1 + tapCount * 0.1})`;
+            
+            // Progressive Haptic Feedback
+            bottleTrigger.classList.remove('shake-1', 'shake-2', 'shake-3');
+            if (tapCount === 1) {
+                triggerHaptic(40); 
+                bottleTrigger.classList.add('shake-1');
+                popInstruction.innerText = "Keep tapping...";
+            } else if (tapCount === 2) {
+                triggerHaptic([50, 40, 50]); 
+                bottleTrigger.classList.add('shake-2');
+                popInstruction.innerText = "Almost there!";
+            } else if (tapCount >= totalTapsRequired) {
+                triggerHaptic([150, 80, 250]); // Strong celebratory pop
+                bottleTrigger.classList.add('shake-3');
+                bottleTrigger.classList.add('bottle-pop-anim');
+                popInstruction.innerText = "POP!";
+                fireCornerConfetti();
+                setTimeout(() => {
+                    playScene(currentSceneIndex + 1); 
+                }, 800);
+            }
         });
 
         function createFloatingHearts() {
@@ -417,14 +463,14 @@
             const particles = [];
             const colors = ['#f87171', '#fb7185', '#ffffff', '#fcd34d'];
             function createBurst(x, direction) {
-                for (let i = 0; i < 40; i++) {
+                for (let i = 0; i < 50; i++) {
                     particles.push({
                         x: x, y: canvas.height,
-                        vx: direction * (Math.random() * 10 + 3),
-                        vy: Math.random() * -15 - 5,
+                        vx: direction * (Math.random() * 14 + 5),
+                        vy: Math.random() * -20 - 7,
                         color: colors[Math.floor(Math.random() * colors.length)],
-                        size: Math.random() * 4 + 2,
-                        gravity: 0.25, drag: 0.98, rotation: Math.random() * 360, rSpeed: (Math.random() - 0.5) * 5
+                        size: Math.random() * 5 + 2,
+                        gravity: 0.3, drag: 0.97, rotation: Math.random() * 360, rSpeed: (Math.random() - 0.5) * 8
                     });
                 }
             }
@@ -447,7 +493,10 @@
         window.onload = createFloatingHearts;
         window.onresize = () => {
             const c = document.getElementById('confetti-canvas');
-            c.width = window.innerWidth; c.height = window.innerHeight;
+            if (c) {
+                c.width = window.innerWidth; 
+                c.height = window.innerHeight;
+            }
         };
     </script>
 </body>

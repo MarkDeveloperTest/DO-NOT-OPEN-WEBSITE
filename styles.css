@@ -55,9 +55,8 @@
         .char-style-1 { animation: charFade 0.6s ease-out forwards; }
         .char-style-2 { animation: charSlideIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
         
-        /* Special Pink Text Style */
         .char-special {
-            color: #db2777; /* Pink 600 */
+            color: #db2777; 
             animation: charScale 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
 
@@ -74,24 +73,6 @@
         @keyframes charScale {
             from { opacity: 0; transform: scale(0.8); }
             to { opacity: 1; transform: scale(1); }
-        }
-
-        /* Sparkle over text animation */
-        @keyframes twinkle {
-            0%, 100% { opacity: 0; transform: scale(0); }
-            50% { opacity: 1; transform: scale(1.2); }
-        }
-
-        .text-sparkle {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            background: white;
-            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-            box-shadow: 0 0 5px #fff;
-            animation: twinkle 1.5s infinite ease-in-out;
-            pointer-events: none;
-            z-index: 20;
         }
 
         @keyframes float-heart {
@@ -155,4 +136,36 @@
             white-space: nowrap;
             display: inline-block;
             position: relative;
+        }
+
+        /* Bottle & Vibration Styles */
+        #bottle-trigger {
+            font-size: 80px;
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: inline-block;
+            -webkit-user-select: none;
+            user-select: none;
+            position: relative;
+            touch-action: manipulation;
+        }
+        
+        .shake-1 { animation: shake 0.3s infinite; }
+        .shake-2 { animation: shake 0.15s infinite; }
+        .shake-3 { animation: shake 0.05s infinite; }
+
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-2deg) translateX(-1px); }
+            75% { transform: rotate(2deg) translateX(1px); }
+        }
+
+        .bottle-pop-anim {
+            animation: bottlePop 0.4s ease-out forwards;
+        }
+        
+        @keyframes bottlePop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.6) translateY(-40px); opacity: 1; }
+            100% { transform: scale(2) translateY(-60px); opacity: 0; }
         }
