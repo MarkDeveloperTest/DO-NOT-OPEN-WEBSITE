@@ -13,24 +13,24 @@
             { id: 'scene-5', duration: null }
         ];
 
-        const progressBar = document.getElementById('progress-bar');
-        const beginBtn = document.getElementById('begin-btn');
-        const restartBtn = document.getElementById('restart-btn');
-        const bottleTrigger = document.getElementById('bottle-trigger');
-        const searchText = document.getElementById('search-text');
-        const popInstruction = document.getElementById('pop-instruction');
-        const typingSound = document.getElementById('typing-sound');
+// DOM references
+const progressBar = document.getElementById('progress-bar');
+const beginBtn = document.getElementById('begin-btn');
+const restartBtn = document.getElementById('restart-btn');
+const bottleTrigger = document.getElementById('bottle-trigger');
+const searchText = document.getElementById('search-text');
+const popInstruction = document.getElementById('pop-instruction');
+const typingSound = document.getElementById('typing-sound');
 
-        let tapCount = 0;
-        const totalTapsRequired = 3;
-        let currentSceneIndex = 0;
+// NEW: Tap counter, haptic helper, confetti burst & pop handler
+let tapCount = 0;
+let currentSceneIndex = 0;
+const totalTapsRequired = 3;
 
-        // Haptic Feedback Helper
-        function triggerHaptic(pattern) {
-            if ("vibrate" in navigator) {
-                navigator.vibrate(pattern);
-            }
-        }
+// Haptic helper
+function triggerHaptic(pattern) {
+    if ("vibrate" in navigator) navigator.vibrate(pattern);
+}
 
         async function typeWriter(text) {
             typingSound.play();
@@ -129,6 +129,68 @@
             triggerHaptic(40); // Feedback for restart
         });
 
+        function sprayWhiteConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2 - 50; // Bottle top position
+            const particles = [];
+            const startTime = Date.now();
+            const duration = 10000; // 10 seconds
+            
+            // Create upward spray particles - white only
+            for (let i = 0; i < 120; i++) {
+                // Spread mostly upward with slight spread to sides
+                const angle = (Math.random() - 0.5) * 0.8; // -0.4 to 0.4 radians
+                const speed = Math.random() * 18 + 12;
+                particles.push({
+                    x: centerX,
+                    y: centerY,
+                    vx: Math.sin(angle) * speed,
+                    vy: -Math.cos(angle) * speed, // Negative for upward
+                    color: '#ffffff',
+                    size: Math.random() * 6 + 3,
+                    gravity: 0.15,
+                    drag: 0.98,
+                    rotation: Math.random() * 360,
+                    rSpeed: (Math.random() - 0.5) * 15,
+                    life: 1
+                });
+            }
+            
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const elapsed = Date.now() - startTime;
+                const progress = elapsed / duration;
+                let active = false;
+                
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += p.gravity;
+                    p.vx *= p.drag;
+                    p.vy *= p.drag;
+                    p.rotation += p.rSpeed;
+                    
+                    // Fade out as time progresses
+                    p.life = Math.max(0, 1 - progress);
+                    
+                    if (p.life > 0) active = true;
+                    
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rotation * Math.PI / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = p.life * 0.8;
+                    ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+                    ctx.restore();
+                });
+                
+                if (active) requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
         function createBottleBurst() {
             const canvas = document.getElementById('confetti-canvas');
             const ctx = canvas.getContext('2d');
@@ -170,8 +232,8 @@
         bottleTrigger.addEventListener('click', () => {
             tapCount++;
             
-            // Visual feedback for tap
-            bottleTrigger.style.transform = `scale(${1 + tapCount * 0.1})`;
+            // Visual feedback for tap - scale up more
+            bottleTrigger.style.transform = `scale(${1 + tapCount * 0.15})`;
             
             // Progressive Haptic Feedback
             bottleTrigger.classList.remove('shake-1', 'shake-2', 'shake-3');
@@ -190,7 +252,6 @@
                 bottleTrigger.classList.add('shake-3');
                 bottleTrigger.classList.add('bottle-pop-anim');
                 popInstruction.innerText = "POP!";
-                createBottleBurst();
                 fireCornerConfetti();
                 setTimeout(() => {
                     playScene(currentSceneIndex + 1); 
