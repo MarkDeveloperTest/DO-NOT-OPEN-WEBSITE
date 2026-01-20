@@ -4,7 +4,7 @@
             { id: 'scene-story-1', duration: 3500, text: "Ось що я збирався шукати...", style: 'char-style-1', speed: 30 },
             { id: 'scene-story-2', duration: 3500, text: "Але потім я зупинився і зрозумів...", style: 'char-style-2', speed: 30 },
             { id: 'scene-story-3', duration: 3500, text: "Я хотів зробити щось особливе...", style: 'char-style-1', speed: 30 },
-            { id: 'scene-story-4', duration: 4000, text: "Тому що ТИ особливий :)", style: 'char-special', speed: 50 },
+            { id: 'scene-story-4', duration: 4000, text: "Тому що ТИ особлива", style: 'char-special', speed: 50 },
             { id: 'scene-pop', duration: null }, 
             { id: 'scene-1', duration: 4000 },
             { id: 'scene-2', duration: 4000 },
@@ -229,32 +229,37 @@ function triggerHaptic(pattern) {
             animate();
         }
 
-        bottleTrigger.addEventListener('click', () => {
+                bottleTrigger.addEventListener('click', () => {
             tapCount++;
-            
-            // Visual feedback for tap - scale up more
-            bottleTrigger.style.transform = `scale(${1 + tapCount * 0.15})`;
-            
-            // Progressive Haptic Feedback
-            bottleTrigger.classList.remove('shake-1', 'shake-2', 'shake-3');
-            void bottleTrigger.offsetWidth; // Force reflow to restart animation
-            
+
+            // Clamp intensity so it doesn’t go insane
+            const shakeIntensity = Math.min(tapCount * 2.5, 22);
+
+            bottleTrigger.style.setProperty('--shake', shakeIntensity);
+            bottleTrigger.classList.add('shaking');
+
+            // Progressive scale (kept subtle so shake feels dominant)
+            bottleTrigger.style.transform = `scale(${1 + tapCount * 0.08})`;
+
+            // Haptics + text feedback
             if (tapCount === 1) {
-                triggerHaptic(40); 
-                bottleTrigger.classList.add('shake-1');
+                triggerHaptic(30);
                 popInstruction.innerText = "Продовжуй натискати...";
-            } else if (tapCount === 2) {
-                triggerHaptic([50, 40, 50]); 
-                bottleTrigger.classList.add('shake-2');
+            } 
+            else if (tapCount === 2) {
+                triggerHaptic([40, 30, 40]);
                 popInstruction.innerText = "Майже готово!";
-            } else if (tapCount >= totalTapsRequired) {
-                triggerHaptic([150, 80, 250]); // Strong celebratory pop
-                bottleTrigger.classList.add('shake-3');
+            } 
+            else if (tapCount >= totalTapsRequired) {
+                triggerHaptic([150, 80, 250]);
+                popInstruction.innerText = "";
+
+                bottleTrigger.classList.remove('shaking');
                 bottleTrigger.classList.add('bottle-pop-anim');
-                popInstruction.innerText = "БУМ!";
                 fireCornerConfetti();
+
                 setTimeout(() => {
-                    playScene(currentSceneIndex + 1); 
+                    playScene(currentSceneIndex + 1);
                 }, 800);
             }
         });
