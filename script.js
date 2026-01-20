@@ -22,10 +22,40 @@ const searchText = document.getElementById('search-text');
 const popInstruction = document.getElementById('pop-instruction');
 const typingSound = document.getElementById('typing-sound');
 
+
 // NEW: Tap counter, haptic helper, confetti burst & pop handler
 let tapCount = 0;
 let currentSceneIndex = 0;
 const totalTapsRequired = 3;
+beginBtn.addEventListener('click', () => {
+    bgMusic.play().catch(() => {});
+    setMusicVolume(0.35, 1200); // gentle fade in
+});
+const bgMusic = document.getElementById('bg-music');
+
+let musicTargetVolume = 0.35;   // normal background level
+let musicCurrentVolume = 0;
+let musicFadeInterval = null;
+
+function setMusicVolume(target, duration = 600) {
+    clearInterval(musicFadeInterval);
+    const steps = duration / 40;
+    const step = (target - musicCurrentVolume) / steps;
+
+    musicFadeInterval = setInterval(() => {
+        musicCurrentVolume += step;
+        bgMusic.volume = Math.max(0, Math.min(1, musicCurrentVolume));
+
+        if (
+            (step > 0 && musicCurrentVolume >= target) ||
+            (step < 0 && musicCurrentVolume <= target)
+        ) {
+            musicCurrentVolume = target;
+            bgMusic.volume = target;
+            clearInterval(musicFadeInterval);
+        }
+    }, 40);
+}
 
 // Haptic helper
 function triggerHaptic(pattern) {
