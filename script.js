@@ -1,10 +1,10 @@
     const timeline = [
             { id: 'scene-start', duration: null },
             { id: 'scene-search', duration: null },
-            { id: 'scene-story-1', duration: 3500, text: "That's what I was going to search...", style: 'char-style-1', speed: 30 },
-            { id: 'scene-story-2', duration: 3500, text: "But then I stopped and realized...", style: 'char-style-2', speed: 30 },
-            { id: 'scene-story-3', duration: 3500, text: "I wanted to make something special...", style: 'char-style-1', speed: 30 },
-            { id: 'scene-story-4', duration: 4000, text: "Because YOU are special :)", style: 'char-special', speed: 50 },
+            { id: 'scene-story-1', duration: 3500, text: "Ось що я збирався шукати...", style: 'char-style-1', speed: 30 },
+            { id: 'scene-story-2', duration: 3500, text: "Але потім я зупинився і зрозумів...", style: 'char-style-2', speed: 30 },
+            { id: 'scene-story-3', duration: 3500, text: "Я хотів зробити щось особливе...", style: 'char-style-1', speed: 30 },
+            { id: 'scene-story-4', duration: 4000, text: "Тому що ТИ особливий :)", style: 'char-special', speed: 50 },
             { id: 'scene-pop', duration: null }, 
             { id: 'scene-1', duration: 4000 },
             { id: 'scene-2', duration: 4000 },
@@ -112,11 +112,11 @@ function triggerHaptic(pattern) {
         async function handleSearchSequence() {
             playScene(1);
             await new Promise(r => setTimeout(r, 800));
-            await typeWriter("how to text happy birthday");
+            await typeWriter("як надіслати привіт на день народження");
             await new Promise(r => setTimeout(r, 1200));
             await deleteWriter();
             await new Promise(r => setTimeout(r, 400));
-            playScene(2); 
+            playScene(2);
         }
 
         beginBtn.addEventListener('click', () => {
@@ -242,16 +242,16 @@ function triggerHaptic(pattern) {
             if (tapCount === 1) {
                 triggerHaptic(40); 
                 bottleTrigger.classList.add('shake-1');
-                popInstruction.innerText = "Keep tapping...";
+                popInstruction.innerText = "Продовжуй натискати...";
             } else if (tapCount === 2) {
                 triggerHaptic([50, 40, 50]); 
                 bottleTrigger.classList.add('shake-2');
-                popInstruction.innerText = "Almost there!";
+                popInstruction.innerText = "Майже готово!";
             } else if (tapCount >= totalTapsRequired) {
                 triggerHaptic([150, 80, 250]); // Strong celebratory pop
                 bottleTrigger.classList.add('shake-3');
                 bottleTrigger.classList.add('bottle-pop-anim');
-                popInstruction.innerText = "POP!";
+                popInstruction.innerText = "БУМ!";
                 fireCornerConfetti();
                 setTimeout(() => {
                     playScene(currentSceneIndex + 1); 
