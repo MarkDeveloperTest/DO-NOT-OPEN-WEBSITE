@@ -158,6 +158,12 @@
             50% { filter: drop-shadow(0 10px 35px rgba(251, 146, 60, 0.5)) drop-shadow(0 0 25px rgba(249, 115, 22, 0.4)); }
         }
         
+        @keyframes bottleShake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-6deg); }
+            75% { transform: rotate(6deg); }
+        }
+        
         .shake-1 { animation: shake-1 0.25s infinite; }
         .shake-2 { animation: shake-2 0.12s infinite; }
         .shake-3 { animation: shake-3 0.03s infinite; }
