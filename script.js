@@ -163,21 +163,21 @@ function triggerHaptic(pattern) {
             const canvas = document.getElementById('confetti-canvas');
             const ctx = canvas.getContext('2d');
             const centerX = window.innerWidth / 2;
-            const centerY = window.innerHeight / 2 - 50; // Bottle top position
+            const centerY = window.innerHeight / 2 - 50; 
             const particles = [];
             const startTime = Date.now();
-            const duration = 10000; // 10 seconds
+            const duration = 10000; 
             
-            // Create upward spray particles - white only
+          
             for (let i = 0; i < 120; i++) {
-                // Spread mostly upward with slight spread to sides
-                const angle = (Math.random() - 0.5) * 0.8; // -0.4 to 0.4 radians
+      
+                const angle = (Math.random() - 0.5) * 0.8; 
                 const speed = Math.random() * 18 + 12;
                 particles.push({
                     x: centerX,
                     y: centerY,
                     vx: Math.sin(angle) * speed,
-                    vy: -Math.cos(angle) * speed, // Negative for upward
+                    vy: -Math.cos(angle) * speed, 
                     color: '#ffffff',
                     size: Math.random() * 6 + 3,
                     gravity: 0.15,
@@ -202,7 +202,7 @@ function triggerHaptic(pattern) {
                     p.vy *= p.drag;
                     p.rotation += p.rSpeed;
                     
-                    // Fade out as time progresses
+                   
                     p.life = Math.max(0, 1 - progress);
                     
                     if (p.life > 0) active = true;
